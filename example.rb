@@ -62,6 +62,9 @@ def run_example
 
   print_item cs_account
 
+  puts 'Press any key to continue and delete the sample resources'
+  gets
+
   # #
   # # Delete a Cognitive Services account
   # #
@@ -73,6 +76,7 @@ def run_example
   # #
   puts 'Deleting the resource group'
   resource_client.resource_groups.delete(GROUP_NAME)
+  puts "\nDeleted: #{GROUP_NAME}"
 
 end
 
