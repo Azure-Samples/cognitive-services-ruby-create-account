@@ -1,18 +1,19 @@
 ---
-services: app-service
+services: cognitive-services
 platforms: ruby
 author: veronicagg
 ---
 
 # Manage Azure Cognitive Services with Ruby
 
-This sample demonstrates how to manage your Azure Cognitive Services account using a ruby client.
+This sample demonstrates how to manage your Azure cognitive services account using a ruby client.
 
 **On this page**
 
 - [Run this sample](#run)
 - [What does example.rb do?](#sample)
-
+    - [Create a cognitive services account](#create)
+    - [Delete a cognitive services account](#delete)
 
 <a id="run"></a>
 1. If you don't already have it, [install Ruby and the Ruby DevKit](https://www.ruby-lang.org/en/documentation/installation/).
@@ -61,8 +62,7 @@ This sample demonstrates how to manage your Azure Cognitive Services account usi
 <a id="sample"></a>
 ## What does example.rb do?
 
-The sample creates a DNS Management client and creates a DNS zone.
-It starts by setting up a ResourceManagementClient object using your subscription and credentials.
+This sample starts by setting up a ResourceManagementClient object using your subscription and credentials.
 
 ```ruby
 subscription_id = ENV['AZURE_SUBSCRIPTION_ID'] || '11111111-1111-1111-1111-111111111111' # your Azure Subscription Id
@@ -71,9 +71,12 @@ provider = MsRestAzure::ApplicationTokenProvider.new(
     ENV['AZURE_CLIENT_ID'],
     ENV['AZURE_CLIENT_SECRET'])
 credentials = MsRest::TokenCredentials.new(provider)
-
+cs_client = Azure::ARM::CognitiveServices::CognitiveServicesManagementClient.new(credentials)
+cs_client.long_running_operation_retry_timeout = ENV.fetch('RETRY_TIMEOUT', 30).to_i
 resource_client = Azure::ARM::Resources::ResourceManagementClient.new(credentials)
-resource_client.subscription_id = web_client.subscription_id = subscription_id
+resource_client.subscription_id = cs_client.subscription_id = subscription_id
+resource_client.providers.register("Microsoft.CognitiveServices")
+resource_client.long_running_operation_retry_timeout = ENV.fetch('RETRY_TIMEOUT', 30).to_i
 ```
 
 The sample then sets up a resource group.
@@ -86,6 +89,28 @@ end
 resource_group_params.class.class
 
 resource_client.resource_groups.create_or_update(GROUP_NAME, resource_group_params)
+```
+
+
+<a id="create"></a>
+### Create a cognitive services account
+
+```ruby
+cs_acc_params = Azure::ARM::CognitiveServices::Models::CognitiveServicesAccountCreateParameters.new
+sku = Azure::ARM::CognitiveServices::Models::Sku.new
+sku.name = Azure::ARM::CognitiveServices::Models::SkuName::F0
+cs_acc_params.sku = sku
+cs_acc_params.kind = Azure::ARM::CognitiveServices::Models::Kind::TextAnalytics
+cs_acc_params.location = 'westus'
+cs_acc_params.properties = {:prop1 => 'prop1'}
+cs_account = cs_client.cognitive_services_accounts.create(GROUP_NAME, ACCOUNT_NAME, cs_acc_params)
+```
+
+<a id="delete"></a>
+### Delete a cognitive services account
+
+```ruby
+cs_client.cognitive_services_accounts.delete(GROUP_NAME, ACCOUNT_NAME)
 ```
 
 ## More information
