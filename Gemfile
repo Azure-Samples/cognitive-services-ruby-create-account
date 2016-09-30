@@ -13,7 +13,8 @@ group :development, :test do
   gem 'yard'
 end
 
-gem 'azure_mgmt_resources',         '~>0.5.0'
-gem 'azure_mgmt_cognitive_services','~>0.5.0'
+gem 'azure_mgmt_resources',         '~>0.6.0'
+gem 'azure_mgmt_cognitive_services','~>0.6.0'
 gem 'dotenv',                       '~>2.1'
 gem 'haikunator',                   '~>1.1'
+
